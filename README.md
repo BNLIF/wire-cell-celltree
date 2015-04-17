@@ -10,6 +10,7 @@ Example of how to read the event can be found at [scripts/example.C](scripts/exa
 
 Data files for test can be found at [data/filelist.txt](data/filelist.txt).
 
+Description of the data file version can be fount at [data/version.md](data/version.md).
+
 Geometry file for conversion can be fount at [geometry/ChannelWireGeometry.txt](geometry/ChannelWireGeometry.txt).
 
-    
