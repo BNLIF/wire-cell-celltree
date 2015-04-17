@@ -17,6 +17,14 @@ CellEvent::CellEvent(const char* filename)
     calib_channelId = new vector<int>;
     calib_wf = new TClonesArray();
 
+    simide_channelIdY = new vector<int>;
+    simide_trackId = new vector<int>;
+    simide_tdc = new vector<int>;
+    simide_x = new vector<float>;
+    simide_y = new vector<float>;
+    simide_z = new vector<float>;
+    simide_numElectrons = new vector<float>;
+
     rootFile = new TFile(filename);
     simTree = (TTree*)rootFile->Get("/Event/Sim");
     nEvent = simTree->GetEntries();
@@ -44,12 +52,30 @@ void CellEvent::InitBranchAddress()
     simTree->SetBranchAddress("calib_nChannel", &calib_nChannel);
     simTree->SetBranchAddress("calib_channelId", &calib_channelId);
     simTree->SetBranchAddress("calib_wf", &calib_wf);
+
+    simTree->SetBranchAddress("simide_size", &simide_size);
+    simTree->SetBranchAddress("simide_channelIdY", &simide_channelIdY);
+    simTree->SetBranchAddress("simide_trackId", &simide_trackId);
+    simTree->SetBranchAddress("simide_tdc", &simide_tdc);
+    simTree->SetBranchAddress("simide_x", &simide_x);
+    simTree->SetBranchAddress("simide_y", &simide_y);
+    simTree->SetBranchAddress("simide_z", &simide_z);
+    simTree->SetBranchAddress("simide_numElectrons", &simide_numElectrons);
+
 }
 
 void CellEvent::Reset()
 {
     (*calib_channelId).clear();
     calib_wf->Clear();
+
+    simide_channelIdY->clear();
+    simide_trackId->clear();
+    simide_tdc->clear();
+    simide_x->clear();
+    simide_y->clear();
+    simide_z->clear();
+    simide_numElectrons->clear();
 }
 
 void CellEvent::GetEntry(int entry)

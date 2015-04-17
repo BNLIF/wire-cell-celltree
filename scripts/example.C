@@ -30,5 +30,13 @@
     }
     cout << endl;
 
+    // get the simide energy deposit
+    // cout << ev->simide_numElectrons->at(1) << endl;
+    // cout << ev->simide_size << endl;
+    float totalE = 0;
+    for (int i=0; i<ev->simide_size; i++) {
+        totalE += ev->simide_numElectrons->at(i);
+    }
+    cout << "total number of electrons: " << totalE << endl;
 
 }

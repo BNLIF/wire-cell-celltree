@@ -22,6 +22,15 @@ public:
     std::vector<int> *calib_channelId;
     TClonesArray *calib_wf;
 
+    int simide_size;
+    std::vector<int>   *simide_channelIdY;
+    std::vector<int>   *simide_trackId;
+    std::vector<int>   *simide_tdc;
+    std::vector<float> *simide_x;
+    std::vector<float> *simide_y;
+    std::vector<float> *simide_z;
+    std::vector<float> *simide_numElectrons;
+
     //-------------------------------------
     CellEvent();
     CellEvent(const char* filename);
