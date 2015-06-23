@@ -1,0 +1,42 @@
+#include "services_microboone.fcl"
+
+process_name: celltree
+
+
+services:
+{
+  # TFileService: { fileName: "test.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} 
+  message:      @local::standard_info
+  user:          @local::microboone_simulation_services
+}
+
+
+source:
+{
+  module_type: RootInput
+  fileNames:  [ "gen.root" ] 
+  firstEvent : 1
+  maxEvents:  -1
+}
+
+
+outputs:{}
+
+
+physics:
+{
+  analyzers:
+  {
+    chao: 
+    {
+      module_type:     "CellTree"
+      CalibLabel:      "caldata"
+      outFile:         "celltree.root"
+    }
+  }
+  analysis: [ chao ] 
+  end_paths: [ analysis ]
+}
+

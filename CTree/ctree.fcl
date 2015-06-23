@@ -1,0 +1,46 @@
+#include "services_microboone.fcl"
+
+process_name: ctree
+
+
+services:
+{
+  # TFileService: { fileName: "test.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} 
+  message:      @local::standard_info
+  user:          @local::microboone_simulation_services
+}
+
+
+source:
+{
+  module_type: RootInput
+  fileNames:  [ "gen.root" ] 
+  firstEvent : 1
+  maxEvents:  -1
+}
+
+
+outputs:{}
+
+
+physics:
+{
+  analyzers:
+  {
+    chao: 
+    {
+      module_type:     "CTree"
+      RawDigitLabel:   "daq"
+      CalibLabel:      "caldata"
+      HitsModuleLabel: "gaushit"
+      TrackModuleLabel: ["trackkalmanhit", "trackkalsps", "beziertracker"]
+      outFile:         "sample.root"
+      saveChannelWireMap: false
+    }
+  }
+  analysis: [ chao ] 
+  end_paths: [ analysis ]
+}
+
