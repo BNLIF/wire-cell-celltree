@@ -16,4 +16,4 @@ Description of the data file version can be fount at [data/versions.md](data/ver
 
 Geometry file for conversion can be fount at [geometry/ChannelWireGeometry.txt](geometry/ChannelWireGeometry.txt).
 
-The Geometry file is dumped from LarSoft using the `CTree::saveChannelWireGeometry()` method in [CTree/CTree_module.cc](CellTree/CellTree_module.cc)
+The Geometry file is dumped from LarSoft using the `CTree::saveChannelWireGeometry()` method in [CTree/CTree_module.cc](CTree/CTree_module.cc)
