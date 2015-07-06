@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 
+#include "TNamed.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1F.h"
@@ -14,6 +15,9 @@ CellEvent::CellEvent(){}
 
 CellEvent::CellEvent(const char* filename)
 {
+    raw_channelId = new vector<int>;
+    raw_wf = new TClonesArray();
+
     calib_channelId = new vector<int>;
     calib_wf = new TClonesArray();
 
@@ -25,6 +29,8 @@ CellEvent::CellEvent(const char* filename)
     simide_z = new vector<float>;
     simide_numElectrons = new vector<float>;
 
+    mc_daughters = new std::vector<std::vector<int> >;  // daughters id of this track; vector
+
     rootFile = new TFile(filename);
     simTree = (TTree*)rootFile->Get("/Event/Sim");
     nEvent = simTree->GetEntries();
@@ -35,11 +41,15 @@ CellEvent::CellEvent(const char* filename)
 
 CellEvent::~CellEvent()
 {
+    delete raw_channelId;
+    delete raw_wf;
+
     delete calib_channelId;
     delete calib_wf;
+    delete mc_daughters;
 
     rootFile->Close();
-    delete rootFile;    
+    delete rootFile;
 }
 
 
@@ -48,6 +58,10 @@ void CellEvent::InitBranchAddress()
     simTree->SetBranchAddress("eventNo" , &eventNo);
     simTree->SetBranchAddress("runNo"   , &runNo);
     simTree->SetBranchAddress("subRunNo", &subRunNo);
+
+    simTree->SetBranchAddress("raw_nChannel", &raw_nChannel);
+    simTree->SetBranchAddress("raw_channelId", &raw_channelId);
+    simTree->SetBranchAddress("raw_wf", &raw_wf);
 
     simTree->SetBranchAddress("calib_nChannel", &calib_nChannel);
     simTree->SetBranchAddress("calib_channelId", &calib_channelId);
@@ -62,12 +76,46 @@ void CellEvent::InitBranchAddress()
     simTree->SetBranchAddress("simide_z", &simide_z);
     simTree->SetBranchAddress("simide_numElectrons", &simide_numElectrons);
 
+    simTree->SetBranchAddress("mc_Ntrack"       , &mc_Ntrack);
+    simTree->SetBranchAddress("mc_id"           , &mc_id);
+    simTree->SetBranchAddress("mc_pdg"          , &mc_pdg);
+    simTree->SetBranchAddress("mc_process"      , &mc_process);
+    simTree->SetBranchAddress("mc_mother"       , &mc_mother);
+    simTree->SetBranchAddress("mc_daughters"    , &mc_daughters);
+    simTree->SetBranchAddress("mc_startXYZT"    , &mc_startXYZT);
+    simTree->SetBranchAddress("mc_endXYZT"      , &mc_endXYZT);
+    simTree->SetBranchAddress("mc_startMomentum", &mc_startMomentum);
+    simTree->SetBranchAddress("mc_endMomentum"  , &mc_endMomentum);
+
+    simTree->SetBranchAddress("mc_isnu"  , &mc_isnu);
+    simTree->SetBranchAddress("mc_nGeniePrimaries"  , &mc_nGeniePrimaries);
+    simTree->SetBranchAddress("mc_nu_pdg"  , &mc_nu_pdg);
+    simTree->SetBranchAddress("mc_nu_ccnc"  , &mc_nu_ccnc);
+    simTree->SetBranchAddress("mc_nu_mode"  , &mc_nu_mode);
+    simTree->SetBranchAddress("mc_nu_intType"  , &mc_nu_intType);
+    simTree->SetBranchAddress("mc_nu_target"  , &mc_nu_target);
+    simTree->SetBranchAddress("mc_hitnuc"  , &mc_hitnuc);
+    simTree->SetBranchAddress("mc_hitquark"  , &mc_hitquark);
+    simTree->SetBranchAddress("mc_nu_Q2"  , &mc_nu_Q2);
+    simTree->SetBranchAddress("mc_nu_W"  , &mc_nu_W);
+    simTree->SetBranchAddress("mc_nu_X"  , &mc_nu_X);
+    simTree->SetBranchAddress("mc_nu_Y"  , &mc_nu_Y);
+    simTree->SetBranchAddress("mc_nu_Pt"  , &mc_nu_Pt);
+    simTree->SetBranchAddress("mc_nu_X"  , &mc_nu_X);
+    simTree->SetBranchAddress("mc_nu_pos"  , &mc_nu_pos);
+    simTree->SetBranchAddress("mc_nu_mom"  , &mc_nu_mom);
+
 }
 
 void CellEvent::Reset()
 {
+    (*raw_channelId).clear();
+    raw_wf->Clear();
+
     (*calib_channelId).clear();
     calib_wf->Clear();
+
+    (*mc_daughters).clear();
 
     simide_channelIdY->clear();
     simide_trackId->clear();
@@ -91,9 +139,12 @@ void CellEvent::GetEntry(int entry)
 
 void CellEvent::PrintInfo(int level)
 {
-    cout << "run/subRun/event (total) : " 
-        << runNo << "/" 
-        << subRunNo << "/" 
+    TNamed* version = (TNamed*)rootFile->Get("version");
+    cout << "data version: " << version->GetTitle() << endl;
+
+    cout << "run/subRun/event (total) : "
+        << runNo << "/"
+        << subRunNo << "/"
         << eventNo-1 << " ("
         << nEvent << ")"
         << endl;
@@ -108,6 +159,22 @@ void CellEvent::PrintInfo(int level)
         }
         cout << endl;
     }
+
+    if (level > 0) {
+        cout << "MC tracks:" << mc_Ntrack;
+        for (int i=0; i<mc_Ntrack; i++) {
+            cout << "\n              id: " << mc_id[i];
+            cout << "\n             pdg: " << mc_pdg[i];
+            cout << "\n          mother: " << mc_mother[i];
+            cout << "\n      Ndaughters: " << (*mc_daughters).at(i).size();
+            cout << "\n      start XYZT: (" << mc_startXYZT[i][0] << ", " << mc_startXYZT[i][1] << ", " << mc_startXYZT[i][2] << ", " << mc_startXYZT[i][3] << ")";
+            cout << "\n        end XYZT: (" << mc_endXYZT[i][0] << ", " << mc_endXYZT[i][1] << ", " << mc_endXYZT[i][2] << ", " << mc_endXYZT[i][3] << ")";
+            cout << "\n  start momentum: (" << mc_startMomentum[i][0] << ", " << mc_startMomentum[i][1] << ", " << mc_startMomentum[i][2] << ", " << mc_startMomentum[i][3] << ")";
+            cout << "\n    end momentum: (" << mc_endMomentum[i][0] << ", " << mc_endMomentum[i][1] << ", " << mc_endMomentum[i][2] << ", " << mc_endMomentum[i][3] << ")";
+            cout << endl;
+        }
+    }
+    
     if (level>1) {
         for (int i=0; i<calib_nChannel; i++) {
             cout << calib_channelId->at(i) << " ";
