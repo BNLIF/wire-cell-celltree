@@ -2,9 +2,14 @@
 #define CELLEVENT_H
 
 #include <vector>
+#include <map>
+#include <iostream>
+#include "TString.h"
+
 class TClonesArray;
 class TTree;
 class TFile;
+class TDatabasePDG;
 
 class CellEvent {
 public:
@@ -67,7 +72,14 @@ public:
     double mc_nu_Theta; // angle relative to lepton
     float mc_nu_pos[4];  // interaction position of nu
     float mc_nu_mom[4];  // interaction momentum of nu
-    
+
+    // ----- derived ---
+    std::map<int, int> trackIndex;
+    std::vector<std::vector<int> > trackParents;
+    std::vector<std::vector<int> > trackChildren;
+    std::vector<std::vector<int> > trackSiblings;
+    TDatabasePDG *dbPDG;
+
     //-------------------------------------
     CellEvent();
     CellEvent(const char* filename);
@@ -77,7 +89,20 @@ public:
     void GetEntry(int i);
     void Reset();
     void PrintInfo(int level=0);  // print the current event(entry) info
+    void PrintMCInfo();  // print mc tracks info
     void InitBranchAddress();
+
+    bool IsPrimary(int i) { return mc_mother[i] == 0 ; }
+    void ProcessTracks();
+    void PrintVector(std::vector<int>& v);
+    double KE(float* momentum);  // KE
+    TString PDGName(int pdg);
+    double thresh_KE;
+    bool KeepMC(int i);
+
+    bool DumpJSON(int id, ostream& out);
+    void DumpJSON(ostream& out = std::cout);
+
 
 };
 
